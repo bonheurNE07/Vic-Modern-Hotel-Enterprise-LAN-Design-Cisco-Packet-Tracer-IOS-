@@ -39,5 +39,26 @@ Each **.cfg file** contains the Cisco IOS configuration of the respective device
 * **Wireless Access Points** – WiFi connectivity per floor
 
 ---
+## 1. IP Plan & VLANs
+
+Each floor has its own departments, with dedicated VLAN IDs and subnets. We use **192.168.X.0/24** addressing, where **X = VLAN ID** for simplicity.
+
+| Floor | Department         | VLAN ID | Subnet          | Gateway IP   |
+| ----- | ------------------ | ------- | --------------- | ------------ |
+| 1     | Reception          | 10      | 192.168.10.0/24 | 192.168.10.1 |
+| 1     | Restaurant         | 20      | 192.168.20.0/24 | 192.168.20.1 |
+| 1     | Kitchen            | 30      | 192.168.30.0/24 | 192.168.30.1 |
+| 2     | Finance            | 40      | 192.168.40.0/24 | 192.168.40.1 |
+| 2     | HR                 | 50      | 192.168.50.0/24 | 192.168.50.1 |
+| 2     | Guest Rooms (WiFi) | 60      | 192.168.60.0/24 | 192.168.60.1 |
+| 3     | IT Department      | 70      | 192.168.70.0/24 | 192.168.70.1 |
+| 3     | Admin Offices      | 80      | 192.168.80.0/24 | 192.168.80.1 |
+
+### Notes
+
+* Each VLAN has its **own DHCP pool** served by the floor router.
+* Default gateways are configured on router subinterfaces.
+* Wireless clients (VLAN 60) connect through access points mapped to their VLAN.
+* VLAN 70 (IT) will have **port-security** enabled on its Test-PC port.
 
 ---
