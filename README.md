@@ -268,3 +268,127 @@ router ospf 1
 ```
 
 ---
+
+# Router Configuration – Floor 3 (F3-RT)
+
+## Purpose
+
+* Acts as the default gateway for VLANs 70 and 80 (IT Department and Admin Offices).
+* Provides inter-VLAN routing using **Router-on-a-Stick**.
+* Runs **OSPF** to advertise connected networks.
+* Provides **DHCP pools** per VLAN.
+* Allows **SSH remote access**.
+* Enforces **port-security** on IT Test-PC (VLAN 70).
+
+---
+
+## Base Configuration (F3-RT)
+
+```cisco
+hostname F3-RT
+no ip domain-lookup
+
+! Enable secret
+enable secret xpass10admin
+!
+ip domain-name vicmodern.local
+crypto key generate rsa modulus 1024
+ip ssh version 2
+username admin-38 privilege 15 secret xpass8admin
+!
+line vty 0 4
+ login local
+ transport input ssh
+!
+```
+
+---
+
+## Interfaces to Other Routers (Serial DCE/DTE links)
+
+```cisco
+interface Serial0/0/0
+ ip address 10.10.10.2 255.255.255.252
+ no shutdown
+!
+interface Serial0/0/1
+ ip address 10.10.10.10 255.255.255.252
+ clock rate 64000
+ no shutdown
+```
+
+---
+
+## Subinterfaces for VLANs
+
+```cisco
+interface g0/0
+ no shutdown
+
+interface g0/0.70
+ encapsulation dot1Q 70
+ ip address 192.168.70.1 255.255.255.0
+
+interface g0/0.80
+ encapsulation dot1Q 80
+ ip address 192.168.80.1 255.255.255.0
+
+interface g0/0.90
+ encapsulation dot1Q 90
+ ip address 192.168.90.1 255.255.255.0
+```
+
+---
+
+## DHCP Pools
+
+```cisco
+ip dhcp excluded-address 192.168.70.1 192.168.70.10
+ip dhcp excluded-address 192.168.80.1 192.168.80.10
+ip dhcp excluded-address 192.168.90.1 192.168.80.10
+
+ip dhcp pool VLAN70-POOL
+ network 192.168.70.0 255.255.255.0
+ default-router 192.168.70.1
+ dns-server 8.8.8.8
+
+ip dhcp pool VLAN80-POOL
+ network 192.168.80.0 255.255.255.0
+ default-router 192.168.80.1
+ dns-server 8.8.8.8
+
+ip dhcp pool VLAN90-POOL
+ network 192.168.90.0 255.255.255.0
+ default-router 192.168.90.1
+ dns-server 8.8.8.8
+```
+
+---
+
+## OSPF Configuration
+
+```cisco
+router ospf 1
+ router-id 3.3.3.3
+ network 192.168.70.0 0.0.0.255 area 0
+ network 192.168.80.0 0.0.0.255 area 0
+network 192.168.90.0 0.0.0.255 area 0
+ network 10.10.10.8 0.0.0.3 area 0
+ network 10.10.10.12 0.0.0.3 area 0
+```
+
+---
+
+## Port-Security (on F3-SW for IT Test-PC)
+
+```cisco
+interface fa0/1
+  switchport mode access
+  switchport access vlan 70
+  switchport port-security
+  switchport port-security maximum 1
+  switchport port-security mac-address sticky
+  switchport port-security violation restrict
+```
+
+---
