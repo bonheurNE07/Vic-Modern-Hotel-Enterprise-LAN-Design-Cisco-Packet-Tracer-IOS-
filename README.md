@@ -80,6 +80,9 @@ Each floor has its own departments, with dedicated VLAN IDs and subnets. We use 
 hostname F1-RT
 no ip domain-lookup
 !
+! Enable secret
+enable secret xpass10admin
+! Configure SSH
 ip domain-name vicmodern.local
 crypto key generate rsa modulus 1024
 ip ssh version 2
@@ -91,6 +94,17 @@ line vty 0 4
 !
 ```
 
+## Interfaces to other routers (Serial DCE/DTE links)
+```
+interface Serial0/0/0
+ip address 10.10.10.1 255.255.255.252
+clock rate 64000
+no shutdown
+!
+interface Serial0/0/1
+ip address 10.10.10.5 255.255.255.252
+no shutdown
+```
 ---
 
 ## Subinterfaces for VLANs
@@ -144,9 +158,113 @@ router ospf 1
  network 192.168.10.0 0.0.0.255 area 0
  network 192.168.20.0 0.0.0.255 area 0
  network 192.168.30.0 0.0.0.255 area 0
+ network 10.10.10.4 0.0.0.3 area 0
+ network 10.10.10.0 0.0.0.3 area 0
 ```
 
 ---
 
-✅ This completes the **1st Floor Router (F1-RT)** configuration.
+# Router Configuration – Floor 2 (F2-RT)
 
+## Purpose
+
+* Acts as the default gateway for VLANs 40, 50, and 60 (Rooms, Conference Hall, Gym).
+* Provides inter-VLAN routing using **Router-on-a-Stick**.
+* Runs **OSPF** to advertise connected networks.
+* Provides **DHCP pools** per VLAN.
+* Allows **SSH remote access**.
+
+---
+
+## Base Configuration (F2-RT)
+
+```
+hostname F2-RT
+no ip domain-lookup
+
+! Enable secret
+enable secret xpass10admin
+!
+ip domain-name vicmodern.local
+crypto key generate rsa modulus 1024
+ip ssh version 2
+username admin-38 privilege 15 secret xpass8admin
+!
+line vty 0 4
+ login local
+ transport input ssh
+!
+```
+
+## Interfaces to other routers (Serial DCE/DTE links)
+```
+interface Serial0/0/0
+ip address 10.10.10.6 255.255.255.252
+clock rate 64000
+no shutdown
+!
+interface Serial0/0/1
+ip address 10.10.10.9 255.255.255.252
+no shutdown
+```
+---
+
+## Subinterfaces for VLANs
+
+```
+interface g0/0
+ no shutdown
+
+interface g0/0.40
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.0
+
+interface g0/0.50
+ encapsulation dot1Q 50
+ ip address 192.168.50.1 255.255.255.0
+
+interface g0/0.60
+ encapsulation dot1Q 60
+ ip address 192.168.60.1 255.255.255.0
+```
+
+---
+
+## DHCP Pools
+
+```
+ip dhcp excluded-address 192.168.40.1 192.168.40.10
+ip dhcp excluded-address 192.168.50.1 192.168.50.10
+ip dhcp excluded-address 192.168.60.1 192.168.60.10
+
+ip dhcp pool VLAN40-POOL
+ network 192.168.40.0 255.255.255.0
+ default-router 192.168.40.1
+ dns-server 8.8.8.8
+
+ip dhcp pool VLAN50-POOL
+ network 192.168.50.0 255.255.255.0
+ default-router 192.168.50.1
+ dns-server 8.8.8.8
+
+ip dhcp pool VLAN60-POOL
+ network 192.168.60.0 255.255.255.0
+ default-router 192.168.60.1
+ dns-server 8.8.8.8
+```
+
+---
+
+## OSPF Configuration
+
+```
+router ospf 1
+ router-id 2.2.2.2
+ network 192.168.40.0 0.0.0.255 area 0
+ network 192.168.50.0 0.0.0.255 area 0
+ network 192.168.60.0 0.0.0.255 area 0
+ network 10.10.10.4 0.0.0.3 area 0
+ network 10.10.10.8 0.0.0.3 area 0
+```
+
+---
