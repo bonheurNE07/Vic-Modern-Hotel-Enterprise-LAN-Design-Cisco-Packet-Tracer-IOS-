@@ -39,7 +39,7 @@ Each **.cfg file** contains the Cisco IOS configuration of the respective device
 * **Wireless Access Points** – WiFi connectivity per floor
 
 ---
-## 1. IP Plan & VLANs
+# 1. IP Plan & VLANs
 
 Each floor has its own departments, with dedicated VLAN IDs and subnets. We use **192.168.X.0/24** addressing, where **X = VLAN ID** for simplicity.
 
@@ -62,3 +62,91 @@ Each floor has its own departments, with dedicated VLAN IDs and subnets. We use 
 * VLAN 70 (IT) will have **port-security** enabled on its Test-PC port.
 
 ---
+# 2. Routers Configurations
+
+## Router Configuration – Floor 1 (F1-RT)
+
+### Purpose
+- Acts as the default gateway for VLANs 10, 20, and 30 (Reception, Restaurant, Kitchen).
+- Provides inter-VLAN routing using **Router-on-a-Stick**.
+- Runs **OSPF** to advertise connected networks.
+- Provides **DHCP pools** per VLAN.
+- Allows **SSH remote access**.
+
+---
+
+## Base Configuration (F1-RT)
+```
+hostname F1-RT
+no ip domain-lookup
+!
+ip domain-name vicmodern.local
+crypto key generate rsa modulus 1024
+ip ssh version 2
+username admin-38 privilege 15 secret xpass8admin
+!
+line vty 0 4
+ login local
+ transport input ssh
+!
+```
+
+---
+
+## Subinterfaces for VLANs
+```
+interface g0/0
+ no shutdown
+
+interface g0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+
+interface g0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+
+interface g0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+```
+
+---
+
+## DHCP Pools
+```
+ip dhcp excluded-address 192.168.10.1 192.168.10.10
+ip dhcp excluded-address 192.168.20.1 192.168.20.10
+ip dhcp excluded-address 192.168.30.1 192.168.30.10
+
+ip dhcp pool VLAN10-POOL
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 8.8.8.8
+
+ip dhcp pool VLAN20-POOL
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 8.8.8.8
+
+ip dhcp pool VLAN30-POOL
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.1
+ dns-server 8.8.8.8
+```
+
+---
+
+## OSPF Configuration
+```
+router ospf 1
+ router-id 1.1.1.1
+ network 192.168.10.0 0.0.0.255 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+ network 192.168.30.0 0.0.0.255 area 0
+```
+
+---
+
+✅ This completes the **1st Floor Router (F1-RT)** configuration.
+
