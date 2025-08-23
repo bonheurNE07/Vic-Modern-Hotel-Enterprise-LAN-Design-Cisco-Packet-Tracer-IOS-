@@ -19,8 +19,8 @@ Vic-Modern-Hotel-Enterprise-LAN-Design-Cisco-Packet-Tracer-IOS/
 │  │  ├─ F1-SW.cfg   ← Switch for 1st floor
 │  │  ├─ F2-SW.cfg   ← Switch for 2nd floor
 │  │  └─ F3-SW.cfg   ← Switch for 3rd floor
-│  └─ topology-diagram.png  ← exported Packet Tracer diagram
-|  └─ topology-diagram.png  ← exported Cisco Packet Tracer file
+│  └─ topology-diagram.pkt  ← exported Packet Tracer diagram
+|  └─ topology-diagram.png  ← exported png topology diagram
 └─ README.md  ← this documentation
 ```
 
