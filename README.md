@@ -95,6 +95,8 @@ line vty 0 4
  login local
  transport input ssh
 !
+banner motd # Authorized access only. Disconnect IMMEDIATELY for unauthorized usage. #
+!
 ```
 
 ## Interfaces to other routers (Serial DCE/DTE links)
@@ -207,6 +209,8 @@ username admin-38 privilege 15 secret xpass8admin
 line vty 0 4
  login local
  transport input ssh
+!
+banner motd # Authorized access only. Disconnect IMMEDIATELY for unauthorized usage. #
 !
 ```
 
@@ -325,6 +329,8 @@ line vty 0 4
  login local
  transport input ssh
 !
+banner motd # Authorized access only. Disconnect IMMEDIATELY for unauthorized usage. #
+!
 ```
 
 ---
@@ -439,6 +445,8 @@ enable secret xpass10admin
 line vty 0 4
  login local
  transport input ssh
+
+banner motd # Authorized access only. Disconnect IMMEDIATELY for unauthorized usage. #
 
 spanning-tree mode pvst
 spanning-tree extend system-id
@@ -557,6 +565,8 @@ line vty 0 4
  login local
  transport input ssh
 
+banner motd # Authorized access only. Disconnect IMMEDIATELY for unauthorized usage. #
+
 spanning-tree mode pvst
 spanning-tree extend system-id
 
@@ -674,6 +684,8 @@ enable secret xpass10admin
 line vty 0 4
  login local
  transport input ssh
+
+banner motd # Authorized access only. Disconnect IMMEDIATELY for unauthorized usage. #
 
 spanning-tree mode pvst
 spanning-tree extend system-id
